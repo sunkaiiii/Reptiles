@@ -30,3 +30,4 @@ for item in soup.find_all("input"):
         data=urllib.urlencode(data)
 
 
+
