@@ -2,21 +2,23 @@
 import mysql.connector
 import os
 
-dir = "/img/classify_divide_img/"
-config={
-    'host':'127.0.0.1',
-    'user':'root',
-    'port':3306,
-    'database':'heritage',
-    'charset':'utf8'
+dir = "/img/folk_img/"
+config = {
+    'host': 'btbudinner.win',
+    'user': 'root',
+    'port': 3306,
+    'database': 'heritage',
+    'charset': 'utf8',
+    'password': "123456"
 }
+
 
 def readDir():
     result = []
-    rootpath = "/非遗/分类"
-    os.listdir(os.getcwd() + "/非遗/分类")
+    rootpath = "/非遗/地方"
+    os.listdir(os.getcwd() + rootpath)
     count = 0
-    for dirname in os.listdir(os.getcwd() + "/非遗/分类"):
+    for dirname in os.listdir(os.getcwd() + rootpath):
         if os.path.isdir(os.getcwd() + rootpath + "/" + dirname):
             dividedir = os.getcwd() + rootpath + "/" + dirname
             for itemdir in os.listdir(dividedir):
@@ -25,7 +27,8 @@ def readDir():
                     class_activity = {}
                     count += 1
                     class_activity["id"] = count
-                    class_activity["divide"]=dirname
+                    class_activity["divide"] = dirname
+                    class_activity["title"] = itemdir
                     for files in os.listdir(readdir):
                         if ".txt" == os.path.splitext(files)[1]:
                             file = open(readdir + "/" + files)
@@ -45,66 +48,72 @@ def readDir():
                                 else:
                                     if not class_activity.has_key("content"):
                                         class_activity["content"] = ""
-                                    class_activity["content"] += txt
+                                    class_activity["content"] += txt + "\n"
                             result.append(class_activity)
                         elif "img" == files:
                             imageDir = readdir + "/" + files
                             images = []
                             for imageName in os.listdir(imageDir):
+                                if not class_activity.has_key("image"):
+                                    class_activity["image"] = dir + imageName
                                 images.append(dir + imageName)
-                            class_activity["image"] = images
-    for items in result:
-        for key, value in items.iteritems():
-            if key == "image":
-                strs = ""
-                for i in value:
-                    strs += "{" + i + "}"
-                # print(key + " " + str(i))
-                continue
-            # print(key + " " + str(value))
+                            class_activity["images"] = images
+    # for items in result:
+    #     for key, value in items.iteritems():
+    #         if key == "image":
+    #             strs = ""
+    #             for i in value:
+    #                 strs += "{" + i + "}"
+    #             print(key + " " + str(i))
+    #             continue
+    #         print(key + " " + str(value))
     return result
 
 
 def writeToSql():
-    sql = "insert into classify_activity_new(id,time,divide,category,location,apply_location,content,number) values(%s,%s,%s,%s,%s,%s,%s,%s)"
-    result=readDir()
-    sqlData=[]
-    imageData=[]
-    imagesql="insert into classify_activity_image(classify_id,img) values(%s,%s)"
+    sql = "insert into folk_activity_information(id,time,divide,category,title,location,apply_location,content,number,img) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    result = readDir()
+    sqlData = []
+    imageData = []
+    imagesql = "insert into folk_activity_img(classify_id,img) values(%s,%s)"
     for items in result:
-        id=str(items["id"])
-        divide=items["divide"]
-        time=""
-        category=""
-        location=""
-        apply_location=""
-        content=""
-        number=""
+        id = str(items["id"])
+        divide = items["divide"]
+        title = items["title"]
+        time = ""
+        category = ""
+        location = ""
+        apply_location = ""
+        content = ""
+        number = ""
+        img = ""
         if items.has_key("time"):
-            time=items["time"]
+            time = items["time"]
         if items.has_key("category"):
-            category=items["category"]
+            category = items["category"]
         if items.has_key("location"):
-            location=items["location"]
+            location = items["location"]
         if items.has_key("apply_location"):
-            apply_location=items["apply_location"]
+            apply_location = items["apply_location"]
         if items.has_key("content"):
-            content=items["content"]
+            content = items["content"]
         if items.has_key("number"):
-            number=items["number"]
-        data=(id,time,divide,category,location,apply_location,content,number)
+            number = items["number"]
+        if items.has_key("image"):
+            img = items["image"]
+        data = (id, time, divide, category, title, location, apply_location, content, number, img)
         sqlData.append(data)
 
-        if items.has_key("image"):
-            for image in items["image"]:
-                data=(id,image)
+        if items.has_key("images"):
+            for image in items["images"]:
+                data = (id, image)
                 imageData.append(data)
 
     try:
-        con=mysql.connector.connect(**config)
-        cursor=con.cursor()
-        cursor.executemany(sql,sqlData)
-        cursor.executemany(imagesql,imageData)
+        con = mysql.connector.connect(**config)
+        cursor = con.cursor()
+        cursor.executemany(sql, sqlData)
+        cursor.executemany(imagesql, imageData)
         con.commit()
     except mysql.connector.Error as e:
         print("insert datas error!{}".format(e))
@@ -112,7 +121,6 @@ def writeToSql():
     finally:
         cursor.close()
         con.close
-
 
 
 if __name__ == "__main__":
