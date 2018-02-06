@@ -3,8 +3,12 @@ import urllib2
 import urllib
 from bs4 import BeautifulSoup
 import os
+import json
+import writeheritageIntoSQL
 
-latest_news_url = """http://feiyi.china.com.cn/china/"""
+latest_news_url = """http://feiyi.china.com.cn/china/index_"""
+
+dir_name = "jsons"
 
 
 def get_response(url):
@@ -16,30 +20,56 @@ def get_response(url):
     return result
 
 
-def saveFile(text):
-    file = open("newx.txt", "w")
-    file.write(text.encode("utf-8"))
+def saveFile(resultList, category):
+    if (not os.path.exists(dir_name)):
+        os.mkdir(dir_name)
+    file_name = "news_" + category + ".txt"
+    file = open(os.path.join("jsons", file_name), "w")
+    file.write(json.dumps(resultList))
     file.close()
 
 
-def generateNews():
-    result = get_response(latest_news_url)
+def generateHTML(url, category):
+    resultList=[]
+    result = get_response(url)
     soup = BeautifulSoup(result)
-    text = ""
     for item in soup.find_all("div"):
-        if (item.find("span") != None and item.find("span").text.encode("utf-8") == "要闻"):
+        if (item.find("span") != None and item.find("span").text.encode("utf-8") == category):
             for item2 in item.find_all("li"):
-                text += item2.find("a").get("href")
-                text += "\n"
-                text += item2.find("a").text
-                text += "\n"
-                if (item2.find("em") is not None):
-                    text += item2.find("em").text
-                    text += "\n"
-
-                text += "\n\n"
-
-    saveFile(text)
+                urlInfo = {}
+                urlInfo["url"] = item2.find("a").get("href")
+                urlInfo["title"] = unicode(item2.find("a").text).encode("utf-8")
+                urlInfo["category"] = category
+                urlInfo["content"] = unicode(item2.text).encode("utf-8")
+                resultList.append(urlInfo)
+    return resultList
 
 
+def generateYaoWen():
+    resultList = []
+    category = "要闻"
+    for i in range(1, 16):
+        if (i == 1):
+            url = "http://feiyi.china.com.cn/china/"
+        else:
+            url = latest_news_url + str(i) + ".html"
+        url_info = generateHTML(url, category)
+        resultList.extend(url_info)
+    saveFile(resultList, category)
+
+
+def load_file(category):
+    file_name = "news_"  + category+".txt"
+    file = open(os.path.join(dir_name, file_name), "r")
+    result = file.read()
+    return result
+
+
+def generateNews():
+    result = load_file("要闻")
+    resultList = json.loads(result)
+    writeheritageIntoSQL.writeFolkNewsToSql(resultList)
+
+
+generateYaoWen()
 generateNews()

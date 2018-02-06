@@ -13,6 +13,28 @@ config = {
 }
 
 
+def writeFolkNewsToSql(resultList):
+    sqlDatas=[]
+    for item in resultList:
+        category=item["category"]
+        title=item["title"]
+        content=item.get("content")
+        data=(title,content,category)
+        sqlDatas.append(data)
+    sql="insert into folk_news(title,content,category) values(%s,%s,%s)"
+    try:
+        con = mysql.connector.connect(**config)
+        cursor = con.cursor()
+        cursor.executemany(sql, sqlDatas)
+        con.commit()
+    except mysql.connector.Error as e:
+        print("insert datas error!{}".format(e))
+        return
+    finally:
+        cursor.close()
+        con.close
+
+
 def readDir():
     result = []
     rootpath = "/非遗/地方"
