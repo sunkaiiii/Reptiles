@@ -3,13 +3,22 @@ import mysql.connector
 import os
 
 dir = "/img/folk_img/"
+# config = {
+#     'host': 'btbudinner.win',
+#     'user': 'root',
+#     'port': 3306,
+#     'database': 'heritage',
+#     'charset': 'utf8',
+#     'password': "123456"
+# }
+
 config = {
-    'host': 'btbudinner.win',
+    'host': '127.0.0.1',
     'user': 'root',
     'port': 3306,
     'database': 'heritage',
     'charset': 'utf8',
-    'password': "123456"
+    'password': ""
 }
 
 
@@ -19,9 +28,10 @@ def writeFolkNewsToSql(resultList):
         category=item["category"]
         title=item["title"]
         content=item.get("content")
-        data=(title,content,category)
+        detail=item.get("detail")
+        data=(title,content,category,detail)
         sqlDatas.append(data)
-    sql="insert into folk_news(title,content,category) values(%s,%s,%s)"
+    sql="insert into folk_news(title,content,category,details) values(%s,%s,%s,%s)"
     try:
         con = mysql.connector.connect(**config)
         cursor = con.cursor()
