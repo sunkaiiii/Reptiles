@@ -29,9 +29,10 @@ def writeFolkNewsToSql(resultList):
         title=item["title"]
         content=item.get("content")
         detail=item.get("detail")
-        data=(title,content,category,detail)
+        img=item.get("img")
+        data=(title,content,category,detail,img)
         sqlDatas.append(data)
-    sql="insert into folk_news(title,content,category,details) values(%s,%s,%s,%s)"
+    sql="insert into folk_news(title,content,category,details,img) values(%s,%s,%s,%s,%s)"
     try:
         con = mysql.connector.connect(**config)
         cursor = con.cursor()

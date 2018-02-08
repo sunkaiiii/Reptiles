@@ -22,7 +22,7 @@ main_page_url = """http://feiyi.china.com.cn/"""
 
 path = "img"
 imagedir = "folk_news"
-main_slide_page_dir="main_news_img"
+main_slide_page_dir = "main_news_img"
 
 feiyiwang = """http://feiyi.china.com.cn"""
 
@@ -39,20 +39,18 @@ def get_response(url):
 
 
 def reptiles_image(url, pathname, spiltfilename):
-
-        if not os.path.exists(path):
-            os.mkdir(path)
-        if not os.path.exists(os.path.join(path, imagedir)):
-            os.mkdir(os.path.join(path, imagedir))
-        if not os.path.exists(os.path.join(path,pathname)):
-            os.mkdir(os.path.join(path,pathname))
-        request = urllib2.Request(url)
-        response = urllib2.urlopen(request)
-        result = response.read()
-        f = open(os.path.join(os.getcwd(), path, pathname, spiltfilename), "w")
-        f.write(result)
-        f.close()
-
+    if not os.path.exists(path):
+        os.mkdir(path)
+    if not os.path.exists(os.path.join(path, imagedir)):
+        os.mkdir(os.path.join(path, imagedir))
+    if not os.path.exists(os.path.join(path, pathname)):
+        os.mkdir(os.path.join(path, pathname))
+    request = urllib2.Request(url)
+    response = urllib2.urlopen(request)
+    result = response.read()
+    f = open(os.path.join(os.getcwd(), path, pathname, spiltfilename), "w")
+    f.write(result)
+    f.close()
 
 
 def find_range(url):
@@ -97,47 +95,46 @@ def generateHTML(url, category):
 
 
 def generate_main_page():
-    result=get_response(main_page_url)
-    soup=BeautifulSoup(result)
-    result_list=[]
+    result = get_response(main_page_url)
+    soup = BeautifulSoup(result)
+    result_list = []
     for item in soup.find_all("div"):
-        if(item.get("class") is not None and item.get("class")[0]=="feature-slide-preview"):
-            info={}
-            info["url"]=item.a.get("href")
-            info["content"]=item.text
-            image_url=feiyiwang+item.find("img").get("src")
-            split_url=image_url.split("/")
-            split_url=split_url[len(split_url)-1]
-            path="main_news_img"
-            reptiles_image(image_url,path,split_url)
-            info["detail"]=generate_main_page_html(feiyiwang+info.get("url"))
-            info["img"]="btbudinner.win:8080/img/main_news_img/"+split_url
+        if (item.get("class") is not None and item.get("class")[0] == "feature-slide-preview"):
+            info = {}
+            info["url"] = item.a.get("href")
+            info["content"] = item.text
+            image_url = feiyiwang + item.find("img").get("src")
+            split_url = image_url.split("/")
+            split_url = split_url[len(split_url) - 1]
+            path = "main_news_img"
+            reptiles_image(image_url, path, split_url)
+            info["detail"] = generate_main_page_html(feiyiwang + info.get("url"))
+            info["img"] = "btbudinner.win:8080/img/main_news_img/" + split_url
             result_list.append(info)
 
-    saveFile(result_list,"首页轮播")
+    saveFile(result_list, "首页轮播")
+
 
 def generate_main_page_html(url):
-    result=get_response(url)
-    soup=BeautifulSoup(result)
-    result_list=[]
+    result = get_response(url)
+    soup = BeautifulSoup(result)
+    result_list = []
     for item in soup.find_all("div"):
-        if(item.get("class") is not None and item.get("class")[0]=="article-zhu"):
+        if (item.get("class") is not None and item.get("class")[0] == "article-zhu"):
             for text_item in item.find_all("p"):
-                info={}
-                if(text_item.find("img") is not None):
-                    info["type"]="img"
-                    image_url=text_item.find("img").get("src")
-                    split_url=image_url.split("/")
-                    split_url=split_url[len(split_url)-1]
-                    reptiles_image(feiyiwang+image_url,main_slide_page_dir,split_url)
-                    info["info"]="btbudinner.win:8080/"+main_slide_page_dir+"/"+split_url
+                info = {}
+                if (text_item.find("img") is not None):
+                    info["type"] = "img"
+                    image_url = text_item.find("img").get("src")
+                    split_url = image_url.split("/")
+                    split_url = split_url[len(split_url) - 1]
+                    reptiles_image(feiyiwang + image_url, main_slide_page_dir, split_url)
+                    info["info"] = "btbudinner.win:8080/" + main_slide_page_dir + "/" + split_url
                 else:
-                    info["type"]="text"
-                    info["info"]=text_item.text
+                    info["type"] = "text"
+                    info["info"] = text_item.text
                 result_list.append(info)
-    return json.dumps(result_list,ensure_ascii=False).decode("utf-8")
-
-
+    return json.dumps(result_list, ensure_ascii=False).decode("utf-8")
 
 
 def generate_ALL_INFO(first_url, scan_url, category):
@@ -232,6 +229,7 @@ def generateeachNews(urlInfos):
         print(title.text)
         urlInfos["title"] = title.text
     detail = []
+    isHadImage = False
     for item in soup.findAll("div"):
         if (item.get("class") is not None and item.get("class")[0] == "article"):
             for item2 in item.find_all("p"):
@@ -242,11 +240,16 @@ def generateeachNews(urlInfos):
                     filename = filename[len(filename) - 1]
                     info["type"] = "img"
                     info["info"] = "btbudinner.win:8080/img/folk_news/" + filename
+                    if (not isHadImage):
+                        urlInfos["img"] = "btbudinner.win:8080/img/folk_news/" + filename
+                        isHadImage = True
                     reptiles_image(feiyiwang + img_url, imagedir, filename)
                 else:
                     info["type"] = "text"
                     info["info"] = item2.text
                 detail.append(info)
+    if (not isHadImage):
+        urlInfos["img"] = ""
     urlInfos["detail"] = json.dumps(detail, ensure_ascii=False).decode("utf-8")
     return urlInfos
 
@@ -261,10 +264,11 @@ def generateNews():
             resultList[index] = generateeachNews(resultList[index])
         writeheritageIntoSQL.writeFolkNewsToSql(resultList)
 
+
 def read_main_page_slide_info():
-    category="首页轮播"
-    result=load_file(category)
-    result_list=json.loads(result)
+    category = "首页轮播"
+    result = load_file(category)
+    result_list = json.loads(result)
     writeheritageIntoSQL.write_main_page_slide_page(result_list)
 
 
@@ -282,5 +286,5 @@ def read_main_page_slide_info():
 # generate_main_page()
 
 
-# generateNews()
+generateNews()
 # read_main_page_slide_info()
