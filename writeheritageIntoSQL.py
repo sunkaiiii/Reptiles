@@ -44,6 +44,28 @@ def writeFolkNewsToSql(resultList):
         cursor.close()
         con.close
 
+def write_main_page_slide_page(result_list):
+    sqlDatas=[]
+    for item in result_list:
+        url=item.get("url")
+        content=item.get("content")
+        img=item.get("img")
+        detail=item.get("detail")
+        data=(url,content,img,detail)
+        sqlDatas.append(data)
+    sql = "insert into main_page_slide(url,content,img,detail) values(%s,%s,%s,%s)"
+    try:
+        con = mysql.connector.connect(**config)
+        cursor = con.cursor()
+        cursor.executemany(sql, sqlDatas)
+        con.commit()
+        cursor.close()
+        con.close()
+    except mysql.connector.Error as e:
+        print("insert datas error!{}".format(e))
+        return
+
+
 
 def readDir():
     result = []
