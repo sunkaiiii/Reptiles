@@ -109,7 +109,7 @@ def generate_main_page():
             path = "main_news_img"
             reptiles_image(image_url, path, split_url)
             info["detail"] = generate_main_page_html(feiyiwang + info.get("url"))
-            info["img"] = "btbudinner.win:8080/img/main_news_img/" + split_url
+            info["img"] = "/img/main_news_img/" + split_url
             result_list.append(info)
 
     saveFile(result_list, "首页轮播")
@@ -129,7 +129,7 @@ def generate_main_page_html(url):
                     split_url = image_url.split("/")
                     split_url = split_url[len(split_url) - 1]
                     reptiles_image(feiyiwang + image_url, main_slide_page_dir, split_url)
-                    info["info"] = "btbudinner.win:8080/" + main_slide_page_dir + "/" + split_url
+                    info["info"] = "/" + main_slide_page_dir + "/" + split_url
                 else:
                     info["type"] = "text"
                     info["info"] = text_item.text
@@ -239,11 +239,11 @@ def generateeachNews(urlInfos):
                     filename = img_url.split("/")
                     filename = filename[len(filename) - 1]
                     info["type"] = "img"
-                    info["info"] = "btbudinner.win:8080/img/folk_news/" + filename
+                    info["info"] = "/img/folk_news/" + filename
                     if (not isHadImage):
-                        urlInfos["img"] = "btbudinner.win:8080/img/folk_news/" + filename
+                        urlInfos["img"] = "/img/folk_news/" + filename
                         isHadImage = True
-                    reptiles_image(feiyiwang + img_url, imagedir, filename)
+                    # reptiles_image(feiyiwang + img_url, imagedir, filename)
                 else:
                     info["type"] = "text"
                     info["info"] = item2.text
@@ -283,8 +283,8 @@ def read_main_page_slide_info():
 # generatezaixian_ALL()
 # generatefaxian_ALL()
 
-# generate_main_page()
+generate_main_page()
 
 
-generateNews()
-# read_main_page_slide_info()
+# generateNews()
+read_main_page_slide_info()

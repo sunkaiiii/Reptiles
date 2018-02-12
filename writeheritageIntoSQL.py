@@ -1,6 +1,7 @@
 # coding=utf-8
 import mysql.connector
 import os
+import json
 
 dir = "/img/folk_img/"
 # config = {
@@ -22,17 +23,46 @@ config = {
 }
 
 
+def wirte_bottom_folk_news_to_sql(resultList):
+    for data in resultList:
+        title = data["title"]
+        time = data["time"]
+        info = []
+        img = ""
+        briefly = ""
+        for item in json.loads(data["content"]):
+            d = {}
+            d["type"] = unicode(item["type"]).encode("utf-8")
+            d["info"] = unicode(item["info"]).encode("utf-8")
+            if (d["type"] == "img" and len(img) == 0):
+                img = d["info"]
+            elif (d["type"] == "text" and len(briefly) < 50):
+                briefly += d["info"]
+            info.append(d)
+        content = json.dumps(info, ensure_ascii=False).decode("utf-8")
+        sqldata = (title, img, time, briefly,content)
+        sql = "insert into bottom_folk_news(title,img,time,news_briefly,content) values(%s,%s,%s,%s,%s)"
+        try:
+            con = mysql.connector.connect(**config)
+            cursor = con.cursor()
+            cursor.execute(sql, sqldata)
+            con.commit()
+        except mysql.connector.Error as e:
+            print("insert datas error!{}".format(e))
+            return
+
+
 def writeFolkNewsToSql(resultList):
-    sqlDatas=[]
+    sqlDatas = []
     for item in resultList:
-        category=item["category"]
-        title=item["title"]
-        content=item.get("content")
-        detail=item.get("detail")
-        img=item.get("img")
-        data=(title,content,category,detail,img)
+        category = item["category"]
+        title = item["title"]
+        content = item.get("content")
+        detail = item.get("detail")
+        img = item.get("img")
+        data = (title, content, category, detail, img)
         sqlDatas.append(data)
-    sql="insert into folk_news(title,content,category,details,img) values(%s,%s,%s,%s,%s)"
+    sql = "insert into folk_news(title,content,category,details,img) values(%s,%s,%s,%s,%s)"
     try:
         con = mysql.connector.connect(**config)
         cursor = con.cursor()
@@ -45,14 +75,15 @@ def writeFolkNewsToSql(resultList):
         cursor.close()
         con.close
 
+
 def write_main_page_slide_page(result_list):
-    sqlDatas=[]
+    sqlDatas = []
     for item in result_list:
-        url=item.get("url")
-        content=item.get("content")
-        img=item.get("img")
-        detail=item.get("detail")
-        data=(url,content,img,detail)
+        url = item.get("url")
+        content = item.get("content")
+        img = item.get("img")
+        detail = item.get("detail")
+        data = (url, content, img, detail)
         sqlDatas.append(data)
     sql = "insert into main_page_slide(url,content,img,detail) values(%s,%s,%s,%s)"
     try:
@@ -65,7 +96,6 @@ def write_main_page_slide_page(result_list):
     except mysql.connector.Error as e:
         print("insert datas error!{}".format(e))
         return
-
 
 
 def readDir():
