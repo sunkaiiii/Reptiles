@@ -16,16 +16,16 @@ var mongoClient *mongo.Client
 
 const dataBaseName = "heritage_online"
 const mainPageCollectionName = "mainPage"
-
+const newsListCollectionName="newsList"
 func createContext() context.Context {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	return ctx
 }
 
 //FindInMongoDB 会寻找是否有重复新闻并返回结果
-func FindInMongoDB(herf string) bool {
+func FindInMongoDB(href string) bool {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	cur := mongoClient.Database(dataBaseName).Collection(mainPageCollectionName).FindOne(ctx, bson.M{"href": herf})
+	cur := mongoClient.Database(dataBaseName).Collection(mainPageCollectionName).FindOne(ctx, bson.M{"href": href})
 	var result struct {
 		Href string
 	}

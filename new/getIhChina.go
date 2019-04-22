@@ -1,13 +1,12 @@
 package main
 
 import (
+	"./handleWebsite"
+	"./mongodb"
 	"fmt"
+	"golang.org/x/net/html"
 	"log"
 	"net/http"
-	"os"
-
-	"./mongodb"
-	"golang.org/x/net/html"
 )
 
 const mainPage = "http://www.ihchina.cn/"
@@ -24,6 +23,11 @@ func main() {
 		panic(err)
 	}
 	defer client.Disconnect(ctx)
+	//readMainPage()
+	handleWebsite.ReadNewsList()
+}
+
+func readMainPage() {
 	resp, err := http.Get(mainPage)
 	if err != nil {
 		log.Println(err)
@@ -31,8 +35,8 @@ func main() {
 	defer resp.Body.Close()
 	doc, err := html.Parse(resp.Body)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "findlinks1:%v\n", err)
-		os.Exit(1)
+		log.Println(err)
+		return
 	}
 	println("开始解析")
 	visit(doc)
