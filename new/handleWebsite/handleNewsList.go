@@ -1,16 +1,17 @@
-package handleWebsite
+package handlewebsite
 
 import (
-	"../mongodb"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/html"
-	"golang.org/x/net/html/atom"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"reflect"
 	"strings"
+
+	"../mongodb"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 const mainPage = "http://www.ihchina.cn/"
@@ -89,9 +90,10 @@ func generateEachNews(n *html.Node) int {
 		resultMap["type"] = "新闻动态"
 		mongodb.WriteNewsToMongoDB(resultMap)
 	} else {
-		log.Println("Duplicated "+resultMap["href"])
+		log.Println("Duplicated " + resultMap["href"])
 		return mongodb.DUPLICATED
 	}
+	//TODO 用channel搞定图片加载队列
 	return 0
 }
 

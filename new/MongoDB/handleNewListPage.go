@@ -3,9 +3,10 @@ package mongodb
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const DUPLICATED = 1
@@ -35,4 +36,18 @@ func WriteNewsToMongoDB(resultMap map[string]string) error {
 		log.Println(err)
 	}
 	return err
+}
+
+//UpdateNewsImage 缓存图片到本地之后更新一个新的Key
+func UpdateNewsImage(path string, originalURL string) {
+	ctx := createContext()
+	update := bson.D{{"$set",
+		bson.D{
+			{"localImage", path},
+		},
+	}}
+	_, err := mongoClient.Database(dataBaseName).Collection(newsListCollectionName).UpdateOne(ctx, bson.M{"image": originalURL}, update)
+	if err != nil {
+		log.Println(err)
+	}
 }

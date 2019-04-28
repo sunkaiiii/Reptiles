@@ -21,3 +21,9 @@ func TestFindNewsListTitleInMongoDB(t *testing.T) {
 	defer mongoClient.Disconnect(ctx)
 	fmt.Println(FindNewsListTitleInMongoDB("/news2_details/1854.html"))
 }
+
+func TestUpdateNewsImage(t *testing.T) {
+	mongoClient, ctx, _ := InitMongoDBConnection()
+	defer mongoClient.Disconnect(ctx)
+	UpdateNewsImage("213", "/Uploads/Picture/2019/04/22/s5cbd18c3404ac_1071_601_0_0.jpg")
+}
