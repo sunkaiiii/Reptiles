@@ -38,7 +38,7 @@ func WriteNewsToMongoDB(resultMap map[string]string) error {
 	return err
 }
 
-//UpdateNewsImage 缓存图片到本地之后更新一个新的Key
+//UpdateNewsImage 缓存图片到本地之后更新一个新的Key"localImage"
 func UpdateNewsImage(path string, originalURL string) {
 	ctx := createContext()
 	update := bson.D{{"$set",

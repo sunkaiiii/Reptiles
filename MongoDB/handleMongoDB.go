@@ -16,7 +16,8 @@ var mongoClient *mongo.Client
 
 const dataBaseName = "heritage_online"
 const mainPageCollectionName = "mainPage"
-const newsListCollectionName="newsList"
+const newsListCollectionName = "newsList"
+
 func createContext() context.Context {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	return ctx

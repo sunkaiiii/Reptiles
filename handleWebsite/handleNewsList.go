@@ -9,13 +9,13 @@ import (
 	"reflect"
 	"strings"
 
-	"../mongodb"
+	"github.com/sunkaiiii/reptiles/mongodb"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
 const mainPage = "http://www.ihchina.cn/"
-const newsListUrl = mainPage + "Article/Index/getList.html"
+const newsListURL = mainPage + "Article/Index/getList.html"
 const imageLabel = "img scaleimg"
 const contentLabel = "cont"
 
@@ -23,12 +23,15 @@ const contentLabel = "cont"
 func ReadNewsList() {
 	page := 1
 	errorTime := 0
+	pictureChan := make(chan string)
+	go startPictureDownloader(pictureChan)
+	defer close(pictureChan)
 	for ; page < 255; page++ {
 		if errorTime > 10 {
 			log.Println("reach the limitation of error time")
 			return
 		}
-		pageUrl := newsListUrl + fmt.Sprintf("?category_id=9&page=%d&limit=0", page)
+		pageUrl := newsListURL + fmt.Sprintf("?category_id=9&page=%d&limit=0", page)
 		fmt.Println(pageUrl)
 		resp, err := http.Get(pageUrl)
 		if err != nil {
@@ -66,23 +69,23 @@ func ReadNewsList() {
 			errorTime++
 			continue
 		}
-		errorTime += walkNewsList(node)
+		errorTime += walkNewsList(node, pictureChan)
 	}
 }
 
-func walkNewsList(nodes []*html.Node) int {
+func walkNewsList(nodes []*html.Node, pictureChan chan string) int {
 	fmt.Println("analyze...")
 	fmt.Println(len(nodes))
 	duplicatedTime := 0
 	for _, n := range nodes {
-		if generateEachNews(n) == mongodb.DUPLICATED {
+		if generateEachNews(n, pictureChan) == mongodb.DUPLICATED {
 			duplicatedTime++
 		}
 	}
 	return duplicatedTime
 }
 
-func generateEachNews(n *html.Node) int {
+func generateEachNews(n *html.Node, pictureChan chan string) int {
 	resultMap := map[string]string{}
 	startToParse(resultMap, n)
 	fmt.Println(resultMap)
@@ -93,7 +96,10 @@ func generateEachNews(n *html.Node) int {
 		log.Println("Duplicated " + resultMap["href"])
 		return mongodb.DUPLICATED
 	}
-	//TODO 用channel搞定图片加载队列
+	//如果页面有图片，加入图片下载队列。
+	if imageName, ok := resultMap["image"]; ok {
+		pictureChan <- imageName
+	}
 	return 0
 }
 
@@ -138,4 +144,10 @@ func handleContentLabel(resultMap map[string]string, node *html.Node) bool {
 		}
 	}
 	return true
+}
+
+func startPictureDownloader(pictureChan chan string) {
+	for pictureURL := range pictureChan {
+		go downloadNewsImage(pictureURL)
+	}
 }

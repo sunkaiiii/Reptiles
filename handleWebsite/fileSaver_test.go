@@ -1,7 +1,7 @@
 package handlewebsite
 
 import "testing"
-import "../mongodb"
+import "github.com/sunkaiiii/reptiles/mongodb"
 
 func TestDownloadNewsImage(t *testing.T) {
 	mongoClient, ctx, _ := mongodb.InitMongoDBConnection()

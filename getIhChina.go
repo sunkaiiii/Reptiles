@@ -1,12 +1,13 @@
 package main
 
 import (
-	"./handleWebsite"
-	"./mongodb"
 	"fmt"
-	"golang.org/x/net/html"
 	"log"
 	"net/http"
+
+	handleWebsite "github.com/sunkaiiii/reptiles/handleWebsite"
+	"github.com/sunkaiiii/reptiles/mongodb"
+	"golang.org/x/net/html"
 )
 
 const mainPage = "http://www.ihchina.cn/"
@@ -18,6 +19,7 @@ var divide = map[string]string{
 }
 
 func main() {
+	//初始化Mongodb
 	client, ctx, err := mongodb.InitMongoDBConnection()
 	if err != nil {
 		panic(err)

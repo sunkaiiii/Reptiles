@@ -7,10 +7,10 @@ import (
 	"os"
 	"path"
 
-	"../mongodb"
+	"github.com/sunkaiiii/reptiles/mongodb"
 )
 
-const newsImageDir = "../img/newNewsImage/"
+const newsImageDir = "./img/newNewsImage/"
 const newsImageDirSaveName = "/img/newNewsImage"
 
 func downloadNewsImage(url string) {
@@ -28,6 +28,7 @@ func downloadNewsImage(url string) {
 	filePath := newsImageDir + path.Base(url)
 	filePathInDB := newsImageDirSaveName + path.Base(url)
 	file, err := os.Create(filePath)
+	log.Println("Create file:" + filePath)
 	if err != nil {
 		log.Println(err)
 	}

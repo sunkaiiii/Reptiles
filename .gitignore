@@ -1,1 +1,4 @@
-new/img
+/img
+/vendor
+Gopkg.lock
+Gopkg.toml
