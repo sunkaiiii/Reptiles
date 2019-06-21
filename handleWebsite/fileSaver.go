@@ -10,8 +10,8 @@ import (
 	"github.com/sunkaiiii/reptiles/mongodb"
 )
 
-const newsImageDir = "./img/newNewsImage/"
-const newsImageDirSaveName = "/img/newNewsImage"
+var newsImageDir = path.Join(".", "img", "newNewsImage")
+var newsImageDirSaveName = path.Join("img", "newNewsImage")
 
 func downloadNewsImage(url string) {
 	const mainPageNoEnd = "http://www.ihchina.cn"
@@ -25,8 +25,9 @@ func downloadNewsImage(url string) {
 		log.Println(err)
 		return
 	}
-	filePath := newsImageDir + path.Base(url)
-	filePathInDB := newsImageDirSaveName + path.Base(url)
+	createFolderIfNotExist()
+	filePath := path.Join(newsImageDir, path.Base(url))
+	filePathInDB := newsImageDirSaveName + "\\" + path.Base(url)
 	file, err := os.Create(filePath)
 	log.Println("Create file:" + filePath)
 	if err != nil {
@@ -38,4 +39,13 @@ func downloadNewsImage(url string) {
 		log.Println(err)
 	}
 	mongodb.UpdateNewsImage(filePathInDB, url)
+}
+
+func createFolderIfNotExist() {
+	if _, err := os.Stat(path.Join(".", "img")); os.IsNotExist(err) {
+		os.Mkdir("img", os.ModePerm)
+	}
+	if _, err := os.Stat(path.Join(".", "img", "newNewsImage")); os.IsNotExist(err) {
+		os.Mkdir(path.Join(".", "img", "newNewsImage"), os.ModePerm)
+	}
 }
