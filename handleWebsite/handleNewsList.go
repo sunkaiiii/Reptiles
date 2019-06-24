@@ -24,7 +24,9 @@ func ReadNewsList() {
 	page := 1
 	errorTime := 0
 	pictureChan := make(chan string)
+	newsDetailChan := make(chan string)
 	go startPictureDownloader(pictureChan)
+	go startAnalyseNewsDetail(newsDetailChan)
 	defer close(pictureChan)
 	for ; page < 255; page++ {
 		if errorTime > 10 {
@@ -69,23 +71,23 @@ func ReadNewsList() {
 			errorTime++
 			continue
 		}
-		errorTime += walkNewsList(node, pictureChan)
+		errorTime += walkNewsList(node, pictureChan, newsDetailChan)
 	}
 }
 
-func walkNewsList(nodes []*html.Node, pictureChan chan string) int {
+func walkNewsList(nodes []*html.Node, pictureChan chan string, newsDetailChan chan string) int {
 	fmt.Println("analyze...")
 	fmt.Println(len(nodes))
 	duplicatedTime := 0
 	for _, n := range nodes {
-		if generateEachNews(n, pictureChan) == mongodb.DUPLICATED {
+		if generateEachNews(n, pictureChan, newsDetailChan) == mongodb.DUPLICATED {
 			duplicatedTime++
 		}
 	}
 	return duplicatedTime
 }
 
-func generateEachNews(n *html.Node, pictureChan chan string) int {
+func generateEachNews(n *html.Node, pictureChan chan string, newsDetailChan chan string) int {
 	resultMap := map[string]string{}
 	startToParse(resultMap, n)
 	fmt.Println(resultMap)
@@ -100,6 +102,7 @@ func generateEachNews(n *html.Node, pictureChan chan string) int {
 	if imageName, ok := resultMap["image"]; ok {
 		pictureChan <- imageName
 	}
+	newsDetailChan <- ""
 	return 0
 }
 
@@ -148,6 +151,6 @@ func handleContentLabel(resultMap map[string]string, node *html.Node) bool {
 
 func startPictureDownloader(pictureChan chan string) {
 	for pictureURL := range pictureChan {
-		go downloadNewsImage(pictureURL)
+		downloadNewsImage(pictureURL)
 	}
 }
