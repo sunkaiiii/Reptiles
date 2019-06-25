@@ -1,10 +1,8 @@
 package mongodb
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -12,20 +10,20 @@ import (
 const DUPLICATED = 1
 const ERROR = 2
 
+type searchListInfoStructure struct {
+	Href string
+}
+
 //FindNewsListTitleInMongoDB 查找是否已经录入了相同的新闻
 func FindNewsListTitleInMongoDB(href string) int {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	cur := mongoClient.Database(dataBaseName).Collection(newsListCollectionName).FindOne(ctx, bson.M{"href": href})
-	var result struct {
-		Href string
-	}
-	_ = cur.Decode(&result)
+	cur := universalSearch(newsListCollectionName, bson.M{"href": href})
+	var result searchListInfoStructure
+	cur.Decode(&result)
 	fmt.Println(result.Href)
 	if len(result.Href) != 0 {
 		return DUPLICATED
-	} else {
-		return 0
 	}
+	return 0
 }
 
 //WriteNewsToMongoDB 写入MongoDB

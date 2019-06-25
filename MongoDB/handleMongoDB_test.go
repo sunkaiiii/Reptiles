@@ -19,7 +19,16 @@ func TestWriteInfoToMongoDB(t *testing.T) {
 func TestFindNewsListTitleInMongoDB(t *testing.T) {
 	mongoClient, ctx, _ := InitMongoDBConnection()
 	defer mongoClient.Disconnect(ctx)
-	fmt.Println(FindNewsListTitleInMongoDB("/news2_details/1854.html"))
+	duplicatedResult := FindNewsListTitleInMongoDB("/news2_details/18841.html")
+	if duplicatedResult != DUPLICATED {
+		t.Log(duplicatedResult)
+		t.Errorf("should be DUPLICATED")
+	}
+	passResult := FindNewsListTitleInMongoDB("/news_details/asfknj3nrk2j3.html")
+	if passResult != 0 {
+		t.Log(passResult)
+		t.Errorf("should be 0")
+	}
 }
 
 func TestUpdateNewsImage(t *testing.T) {

@@ -23,6 +23,10 @@ func createContext() context.Context {
 	return ctx
 }
 
+func universalSearch(collectionName string, filterOption bson.M) *mongo.SingleResult {
+	return mongoClient.Database(dataBaseName).Collection(newsListCollectionName).FindOne(createContext(), filterOption)
+}
+
 //FindInMongoDB 会寻找是否有重复新闻并返回结果
 func FindInMongoDB(href string) bool {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)

@@ -3,6 +3,8 @@ package handlewebsite
 import (
 	"log"
 	"net/http"
+
+	"golang.org/x/net/html"
 )
 
 func startAnalyseNewsDetail(newsDetailURLChan chan string) {
@@ -20,16 +22,22 @@ func startGenerateDetailPage(url string) {
 		log.Println(err)
 		return
 	}
+	defer resp.Body.Close()
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	// var newsDetailMap map[string]interface{}
-	// log.Println(resp.Body)
-	// _, err := html.Parse()
-	// resp.Body.Close()
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
+	node, err := html.Parse(resp.Body)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	walkDetailList(node)
+}
+
+func walkDetailList(node *html.Node) {
+	if node == nil {
+		return
+	}
+
 }
