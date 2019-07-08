@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/sunkaiiii/reptiles/mongodb"
+	mongodb "github.com/sunkaiiii/Reptiles/MongoDB"
 )
 
 var newsImageDir = path.Join(".", "img", "newNewsImage")

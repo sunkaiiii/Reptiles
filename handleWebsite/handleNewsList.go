@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/sunkaiiii/reptiles/mongodb"
+	mongodb "github.com/sunkaiiii/Reptiles/MongoDB"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -33,9 +33,9 @@ func ReadNewsList() {
 			log.Println("reach the limitation of error time")
 			return
 		}
-		pageUrl := newsListURL + fmt.Sprintf("?category_id=9&page=%d&limit=0", page)
-		fmt.Println(pageUrl)
-		resp, err := http.Get(pageUrl)
+		pageURL := newsListURL + fmt.Sprintf("?category_id=9&page=%d&limit=0", page)
+		fmt.Println(pageURL)
+		resp, err := http.Get(pageURL)
 		if err != nil {
 			log.Println(err)
 			errorTime++
